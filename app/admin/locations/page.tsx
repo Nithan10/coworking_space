@@ -631,7 +631,7 @@ const LocationsAdmin = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/locations", {
+      const response = await fetch("https://coworking-space-backend.onrender.com/api/locations", {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
       const data = await response.json();
@@ -671,7 +671,7 @@ const LocationsAdmin = () => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = editingLocation ? `http://localhost:5000/api/locations/${editingLocation._id}` : 'http://localhost:5000/api/locations';
+      const url = editingLocation ? `https://coworking-space-backend.onrender.com/api/locations/${editingLocation._id}` : 'https://coworking-space-backend.onrender.com/api/locations';
       const method = editingLocation ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
@@ -709,7 +709,7 @@ const LocationsAdmin = () => {
   const executeDelete = useCallback(async () => {
     if (!locationToDelete) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${locationToDelete}`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${locationToDelete}`, {
         method: 'DELETE',
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
       });
@@ -728,7 +728,7 @@ const LocationsAdmin = () => {
 
   const toggleStatus = useCallback(async (id: string, currentStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${id}/status`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status: currentStatus === 'published' ? 'draft' : 'published' })

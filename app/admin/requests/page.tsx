@@ -21,7 +21,7 @@ export default function AdminRequests() {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/requests/all");
+      const res = await fetch("https://coworking-space-backend.onrender.com/api/requests/all");
       const data = await res.json();
       if (data.success) setRequests(data.data);
     } catch (err) {
@@ -37,7 +37,7 @@ export default function AdminRequests() {
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}/status`, {
+      const res = await fetch(`https://coworking-space-backend.onrender.com/api/requests/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })

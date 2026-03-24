@@ -37,7 +37,7 @@ export default function MyRequests() {
 
     const fetchMyRequests = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/requests/user?email=${encodeURIComponent(parsedUser.email)}`);
+        const res = await fetch(`https://coworking-space-backend.onrender.com/api/requests/user?email=${encodeURIComponent(parsedUser.email)}`);
         const data = await res.json();
         if (data.success) setRequests(data.data);
       } catch (err) {

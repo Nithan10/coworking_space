@@ -52,7 +52,7 @@ export default function AuthPage() {
 
   // --- 1. Google Auth Handler ---
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "https://coworking-space-backend.onrender.com/api/auth/google";
   };
 
   // --- 2. Manual Auth Handler ---
@@ -62,7 +62,7 @@ export default function AuthPage() {
     setError("");
 
     const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
-    const url = `http://localhost:5000${endpoint}`;
+    const url = `https://coworking-space-backend.onrender.com${endpoint}`;
 
     try {
       const response = await fetch(url, {

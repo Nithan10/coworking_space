@@ -670,7 +670,7 @@ const PropertiesPage = () => {
 
   const fetchLocation = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${locationId}`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${locationId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -875,7 +875,7 @@ const PropertiesPage = () => {
       }));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${locationId}`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${locationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -920,7 +920,7 @@ const PropertiesPage = () => {
       }));
     
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${locationId}`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${locationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -958,7 +958,7 @@ const PropertiesPage = () => {
       }));
     
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/${locationId}`, {
+      const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/${locationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

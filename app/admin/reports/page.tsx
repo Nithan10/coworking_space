@@ -73,7 +73,7 @@ export default function ReportsDashboard() {
           "Authorization": `Bearer ${token}`
         };
 
-        const API_BASE = "http://localhost:5000/api";
+        const API_BASE = "https://coworking-space-backend.onrender.com/api";
         
         let allBookings: Booking[] = [];
         let allEnquiries: Enquiry[] = [];

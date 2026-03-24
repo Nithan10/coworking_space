@@ -23,7 +23,7 @@ export default function AdminBookings() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/payment/bookings");
+        const res = await fetch("https://coworking-space-backend.onrender.com/api/payment/bookings");
         const data = await res.json();
         if (data.success) {
           setBookings(data.data);
@@ -48,7 +48,7 @@ export default function AdminBookings() {
       );
 
       // Send the update to the backend database
-      const res = await fetch(`http://localhost:5000/api/payment/bookings/${bookingId}/status`, {
+      const res = await fetch(`https://coworking-space-backend.onrender.com/api/payment/bookings/${bookingId}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

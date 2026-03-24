@@ -121,7 +121,7 @@ export default function WorkspaceDetails() {
     const fetchProperty = async () => {
       try {
         setLoading(true);
-        const locationResponse = await fetch(`http://localhost:5000/api/locations/city/${cityIdStr}`);
+        const locationResponse = await fetch(`https://coworking-space-backend.onrender.com/api/locations/city/${cityIdStr}`);
         const locationData = await locationResponse.json();
 
         if (locationData.success) {
@@ -224,7 +224,7 @@ export default function WorkspaceDetails() {
       const cityName = property?.city || location?.cityDisplayName || "City";
       const locationAddress = property?.location?.address || `${property?.locality}, ${property?.city}`;
 
-      const response = await fetch('http://localhost:5000/api/payment/initiate', {
+      const response = await fetch('https://coworking-space-backend.onrender.com/api/payment/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

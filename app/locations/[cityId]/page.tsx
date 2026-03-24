@@ -87,7 +87,7 @@ export default function CityPage() {
     const fetchLocation = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/locations/city/${currentCityId}`);
+        const response = await fetch(`https://coworking-space-backend.onrender.com/api/locations/city/${currentCityId}`);
         const data = await response.json();
 
         if (data.success) {

@@ -64,7 +64,7 @@ export default function UserDashboard() {
 
     const fetchMyBookings = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/payment/user-bookings?email=${encodeURIComponent(parsedUser.email)}`);
+        const res = await fetch(`https://coworking-space-backend.onrender.com/api/payment/user-bookings?email=${encodeURIComponent(parsedUser.email)}`);
         const data = await res.json();
         
         if (data.success) setBookings(data.data);
@@ -107,7 +107,7 @@ export default function UserDashboard() {
     if (!selectedBooking || !user) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/requests/create", {
+      const res = await fetch("https://coworking-space-backend.onrender.com/api/requests/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

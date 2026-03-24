@@ -24,7 +24,7 @@ export default function UsersPage() {
         // Grab the admin's token from local storage
         const token = localStorage.getItem("token");
         
-        const response = await fetch("http://localhost:5000/api/users", {
+        const response = await fetch("https://coworking-space-backend.onrender.com/api/users", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

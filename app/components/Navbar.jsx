@@ -48,7 +48,7 @@ export default function Navbar() {
     try {
       if (isInitial) setIsLoadingLocations(true);
       
-      const res = await fetch("http://localhost:5000/api/locations", {
+      const res = await fetch("https://coworking-space-backend.onrender.com/api/locations", {
         cache: 'no-store', 
       });
       const data = await res.json();
