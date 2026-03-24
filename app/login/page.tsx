@@ -14,6 +14,14 @@ const formVariants: Variants = {
   exit: { opacity: 0, x: 20, filter: "blur(4px)", transition: { duration: 0.3, ease: "easeIn" } }
 };
 
+// Helper to determine API URL based on environment
+const getApiUrl = () => {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:5000"; // Local backend
+  }
+  return "https://coworking-space-backend.onrender.com"; // Production backend
+};
+
 export default function AuthPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -24,7 +32,7 @@ export default function AuthPage() {
   const [formData, setFormData] = useState({ 
     name: "", 
     email: "admin@spacehub.com", 
-    password: "admin123" // Changed to a simpler dev password
+    password: "admin123" 
   });
   
   const [loading, setLoading] = useState(false);
@@ -39,7 +47,7 @@ export default function AuthPage() {
     setError(""); // Clear error when typing
   };
 
-  // Switch modes and clear form (except if returning to login, keep dev credentials)
+  // Switch modes and clear form
   const toggleMode = (mode: "login" | "signup") => {
     setAuthMode(mode);
     if (mode === "login") {
@@ -52,7 +60,8 @@ export default function AuthPage() {
 
   // --- 1. Google Auth Handler ---
   const handleGoogleLogin = () => {
-    window.location.href = "https://coworking-space-backend.onrender.com/api/auth/google";
+    const baseUrl = getApiUrl();
+    window.location.href = `${baseUrl}/api/auth/google`;
   };
 
   // --- 2. Manual Auth Handler ---
@@ -61,8 +70,9 @@ export default function AuthPage() {
     setLoading(true);
     setError("");
 
+    const baseUrl = getApiUrl();
     const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
-    const url = `https://coworking-space-backend.onrender.com${endpoint}`;
+    const url = `${baseUrl}${endpoint}`;
 
     try {
       const response = await fetch(url, {
@@ -74,14 +84,11 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Save the JWT token and user data to local storage
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         
-        // Notify the Navbar that the auth state changed
         window.dispatchEvent(new Event("auth-change"));
 
-        // Redirect based on user role!
         if (data.user.role === 'admin') {
           router.push("/admin"); 
         } else {
@@ -93,7 +100,8 @@ export default function AuthPage() {
       }
     } catch (err) {
       console.error("Auth error:", err);
-      setError("Cannot connect to the server. Is the backend running?");
+      // Added a note about Render sleep time to the error
+      setError("Cannot connect to server. If on Render free tier, please wait 60s and try again.");
     } finally {
       setLoading(false);
     }
