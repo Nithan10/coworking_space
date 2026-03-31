@@ -14,7 +14,6 @@ interface RequestItem {
   extraChairs: number;
   otherRequirements: string;
   status: string;
-  expectedDeliveryDate?: string;
   adminNote?: string;
 }
 
@@ -25,7 +24,6 @@ export default function AdminRequests() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState("");
   const [adminNote, setAdminNote] = useState("");
 
   const fetchRequests = async () => {
@@ -64,12 +62,11 @@ export default function AdminRequests() {
   // Open the approval popup
   const handleOpenApproveModal = (id: string) => {
     setSelectedRequestId(id);
-    setDeliveryDate("");
     setAdminNote("");
     setIsModalOpen(true);
   };
 
-  // Submit the approval with date and notes
+  // Submit the approval with notes
   const handleApproveSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRequestId) return;
@@ -80,7 +77,6 @@ export default function AdminRequests() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           status: "Approved",
-          expectedDeliveryDate: deliveryDate,
           adminNote: adminNote
         })
       });
@@ -89,7 +85,7 @@ export default function AdminRequests() {
         // Update UI instantly with new data
         setRequests(requests.map(req => 
           req._id === selectedRequestId 
-            ? { ...req, status: "Approved", expectedDeliveryDate: deliveryDate, adminNote: adminNote } 
+            ? { ...req, status: "Approved", adminNote: adminNote } 
             : req
         ));
         setIsModalOpen(false); // Close modal
@@ -169,14 +165,11 @@ export default function AdminRequests() {
                         'bg-amber-50 text-amber-700'}`}>
                       {req.status}
                     </span>
-                    {/* Display Delivery Date & Note if Approved */}
-                    {req.status === 'Approved' && req.expectedDeliveryDate && (
-                      <span className="text-[10px] text-gray-500 font-medium mt-1">
-                        Delivering: {new Date(req.expectedDeliveryDate).toLocaleDateString()}
-                      </span>
-                    )}
+                    {/* Display Note if Approved */}
                     {req.status === 'Approved' && req.adminNote && (
-                      <span className="text-[10px] text-gray-400">Note: {req.adminNote}</span>
+                      <span className="text-[10px] text-gray-500 font-medium mt-1 bg-gray-50 px-2 py-1 rounded">
+                        Note: {req.adminNote}
+                      </span>
                     )}
                   </div>
                 </td>
@@ -228,31 +221,18 @@ export default function AdminRequests() {
               className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md p-6 overflow-hidden"
             >
               <h2 className="text-xl font-bold text-gray-900 mb-2">Approve Request</h2>
-              <p className="text-sm text-gray-500 mb-6">Specify the delivery date and any additional notes for the user.</p>
+              <p className="text-sm text-gray-500 mb-6">Leave a message or confirmation detail for the user.</p>
               
               <form onSubmit={handleApproveSubmit} className="space-y-4">
-                {/* Delivery Date Input */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Expected Delivery Date <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="date" 
-                    required
-                    value={deliveryDate}
-                    onChange={(e) => setDeliveryDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm font-medium text-gray-900"
-                  />
-                </div>
-
                 {/* Admin Note Input */}
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Details / Quantity Provided (Optional)
+                    Approval Message <span className="text-red-500">*</span>
                   </label>
                   <textarea 
                     rows={3}
-                    placeholder="e.g., 2 extra chairs will be placed at your desk by 9 AM."
+                    required
+                    placeholder="e.g., Your chairs have been placed at your desk."
                     value={adminNote}
                     onChange={(e) => setAdminNote(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm font-medium text-gray-900 resize-none"

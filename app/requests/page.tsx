@@ -15,13 +15,14 @@ interface RequestItem {
   otherRequirements: string;
   status: string;
   createdAt: string;
+  adminNote?: string;
 }
 
 export default function MyRequests() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   
-  // 2. Apply the interface to the state to fix the 'never' type error
+  // 2. Apply the interface to the state
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,14 +169,21 @@ export default function MyRequests() {
                         </span>
                       </td>
 
-                      {/* Status Pill */}
+                      {/* Status Pill & Message */}
                       <td className="p-5 align-middle text-right">
-                        <span className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider
-                          ${req.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-200' : 
-                            req.status === 'Rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 
-                            'bg-amber-50 text-amber-700 border border-amber-200'}`}>
-                          {req.status}
-                        </span>
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider
+                            ${req.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-200' : 
+                              req.status === 'Rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 
+                              'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                            {req.status}
+                          </span>
+                          {req.status === 'Approved' && req.adminNote && (
+                            <p className="text-[10px] font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded max-w-[200px] truncate" title={req.adminNote}>
+                              Msg: {req.adminNote}
+                            </p>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
