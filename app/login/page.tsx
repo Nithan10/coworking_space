@@ -59,6 +59,7 @@ export default function AuthPage() {
   };
 
   // --- 1. Google Auth Handler ---
+  // This redirect is correct. The mismatch error must be fixed in the Google Cloud Console.
   const handleGoogleLogin = () => {
     const baseUrl = getApiUrl();
     window.location.href = `${baseUrl}/api/auth/google`;
