@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import Navbar from "../components/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 // 1. Define the TypeScript interface for the user's requests
 interface RequestItem {
@@ -25,6 +26,10 @@ export default function MyRequests() {
   // 2. Apply the interface to the state
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal State for Viewing Admin Message
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -50,6 +55,11 @@ export default function MyRequests() {
 
     fetchMyRequests();
   }, [router]);
+
+  const handleViewMessage = (message: string) => {
+    setSelectedMessage(message);
+    setIsMessageModalOpen(true);
+  };
 
   if (!user) return null;
 
@@ -169,7 +179,7 @@ export default function MyRequests() {
                         </span>
                       </td>
 
-                      {/* Status Pill & Message */}
+                      {/* Status Pill & Message Button */}
                       <td className="p-5 align-middle text-right">
                         <div className="flex flex-col items-end gap-1.5">
                           <span className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider
@@ -178,10 +188,15 @@ export default function MyRequests() {
                               'bg-amber-50 text-amber-700 border border-amber-200'}`}>
                             {req.status}
                           </span>
+                          
+                          {/* Display View Message Button if Approved with Note */}
                           {req.status === 'Approved' && req.adminNote && (
-                            <p className="text-[10px] font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded max-w-[200px] truncate" title={req.adminNote}>
-                              Msg: {req.adminNote}
-                            </p>
+                            <button 
+                              onClick={() => handleViewMessage(req.adminNote!)}
+                              className="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 hover:border-indigo-200 px-2.5 py-1.5 rounded transition-colors"
+                            >
+                              View Message
+                            </button>
                           )}
                         </div>
                       </td>
@@ -192,6 +207,53 @@ export default function MyRequests() {
             </div>
           </div>
         )}
+
+        {/* --- VIEW MESSAGE MODAL --- */}
+        <AnimatePresence>
+          {isMessageModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                onClick={() => setIsMessageModalOpen(false)}
+                className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+              />
+              
+              {/* Modal Content */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-sm p-6 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Admin Message</h2>
+                </div>
+                
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {selectedMessage}
+                  </p>
+                </div>
+
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => setIsMessageModalOpen(false)}
+                    className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-lg shadow-indigo-200"
+                  >
+                    Close
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
       </main>
     </div>
   );
