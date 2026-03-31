@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link"; 
+import { motion, AnimatePresence } from "framer-motion";
 
 interface RequestItem {
   _id: string;
@@ -13,11 +14,19 @@ interface RequestItem {
   extraChairs: number;
   otherRequirements: string;
   status: string;
+  expectedDeliveryDate?: string;
+  adminNote?: string;
 }
 
 export default function AdminRequests() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [adminNote, setAdminNote] = useState("");
 
   const fetchRequests = async () => {
     try {
@@ -35,6 +44,7 @@ export default function AdminRequests() {
     fetchRequests();
   }, []);
 
+  // Standard status update (used for Rejecting)
   const updateStatus = async (id: string, newStatus: string) => {
     try {
       const res = await fetch(`https://coworking-space-backend.onrender.com/api/requests/${id}/status`, {
@@ -44,11 +54,48 @@ export default function AdminRequests() {
       });
       const data = await res.json();
       if (data.success) {
-        // Update UI instantly
         setRequests(requests.map(req => req._id === id ? { ...req, status: newStatus } : req));
       }
     } catch (err) {
       alert("Failed to update status");
+    }
+  };
+
+  // Open the approval popup
+  const handleOpenApproveModal = (id: string) => {
+    setSelectedRequestId(id);
+    setDeliveryDate("");
+    setAdminNote("");
+    setIsModalOpen(true);
+  };
+
+  // Submit the approval with date and notes
+  const handleApproveSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRequestId) return;
+
+    try {
+      const res = await fetch(`https://coworking-space-backend.onrender.com/api/requests/${selectedRequestId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          status: "Approved",
+          expectedDeliveryDate: deliveryDate,
+          adminNote: adminNote
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Update UI instantly with new data
+        setRequests(requests.map(req => 
+          req._id === selectedRequestId 
+            ? { ...req, status: "Approved", expectedDeliveryDate: deliveryDate, adminNote: adminNote } 
+            : req
+        ));
+        setIsModalOpen(false); // Close modal
+      }
+    } catch (err) {
+      alert("Failed to approve request.");
     }
   };
 
@@ -115,20 +162,37 @@ export default function AdminRequests() {
                   {req.otherRequirements && <p className="text-gray-600 text-xs truncate" title={req.otherRequirements}>{req.otherRequirements}</p>}
                 </td>
                 <td className="p-4">
-                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider
-                    ${req.status === 'Approved' ? 'bg-green-50 text-green-700' : 
-                      req.status === 'Rejected' ? 'bg-red-50 text-red-700' : 
-                      'bg-amber-50 text-amber-700'}`}>
-                    {req.status}
-                  </span>
+                  <div className="flex flex-col items-start gap-1">
+                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider
+                      ${req.status === 'Approved' ? 'bg-green-50 text-green-700' : 
+                        req.status === 'Rejected' ? 'bg-red-50 text-red-700' : 
+                        'bg-amber-50 text-amber-700'}`}>
+                      {req.status}
+                    </span>
+                    {/* Display Delivery Date & Note if Approved */}
+                    {req.status === 'Approved' && req.expectedDeliveryDate && (
+                      <span className="text-[10px] text-gray-500 font-medium mt-1">
+                        Delivering: {new Date(req.expectedDeliveryDate).toLocaleDateString()}
+                      </span>
+                    )}
+                    {req.status === 'Approved' && req.adminNote && (
+                      <span className="text-[10px] text-gray-400">Note: {req.adminNote}</span>
+                    )}
+                  </div>
                 </td>
                 <td className="p-4 text-right space-x-2">
                   {req.status === 'Pending' && (
                     <>
-                      <button onClick={() => updateStatus(req._id, 'Approved')} className="text-xs font-bold text-green-600 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => handleOpenApproveModal(req._id)} 
+                        className="text-xs font-bold text-green-600 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors"
+                      >
                         Approve
                       </button>
-                      <button onClick={() => updateStatus(req._id, 'Rejected')} className="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+                      <button 
+                        onClick={() => updateStatus(req._id, 'Rejected')} 
+                        className="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors"
+                      >
                         Reject
                       </button>
                     </>
@@ -144,6 +208,79 @@ export default function AdminRequests() {
           </tbody>
         </table>
       </div>
+
+      {/* --- APPROVAL MODAL --- */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+            />
+            
+            {/* Modal Content */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md p-6 overflow-hidden"
+            >
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Approve Request</h2>
+              <p className="text-sm text-gray-500 mb-6">Specify the delivery date and any additional notes for the user.</p>
+              
+              <form onSubmit={handleApproveSubmit} className="space-y-4">
+                {/* Delivery Date Input */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Expected Delivery Date <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="date" 
+                    required
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm font-medium text-gray-900"
+                  />
+                </div>
+
+                {/* Admin Note Input */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Details / Quantity Provided (Optional)
+                  </label>
+                  <textarea 
+                    rows={3}
+                    placeholder="e.g., 2 extra chairs will be placed at your desk by 9 AM."
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-indigo-600 focus:bg-white transition-all text-sm font-medium text-gray-900 resize-none"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-lg shadow-indigo-200"
+                  >
+                    Confirm Approval
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
